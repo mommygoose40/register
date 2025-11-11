@@ -84,11 +84,6 @@
       filter: brightness(0.7);  /* 按鈕被按下時的亮度變暗效果 */
     }
 
-    /* 灰色型按鈕 */
-    .ui-btn.gray {
-      background: #60748f;
-    }
-
     /* 提交按鈕 */
     .submit-btn {
       background: #0b5ed7;
@@ -127,97 +122,9 @@
       <input type="text" id="lineName" name="lineName" placeholder="請輸入賴的暱稱" required>
     </div>
 
-    <!-- 按鈕區域 -->
-    <div style="display: flex; justify-content: space-between;">
-      <button class="ui-btn gray" onclick="window.close()">關閉頁面</button>
-      <button class="submit-btn" type="submit" onclick="submitForm()">提交表單</button>
+    <div style="text-align: center;">
+      <button class="submit-btn" type="submit">提交</button>
     </div>
   </div>
-
-  <script>
-    function submitForm() {
-  const name = document.getElementById('name').value;
-  const division = document.getElementById('division').value;
-  const team = document.getElementById('team').value;
-  const lineName = document.getElementById('lineName').value;
-
-  const formData = new FormData();
-  formData.append('姓名', name);       // 使用中文鍵名
-  formData.append('大隊', division);   // 使用中文鍵名
-  formData.append('小隊', team);       // 使用中文鍵名
-  formData.append('Line 暱稱', lineName);  // 使用中文鍵名
-
-  fetch('https://script.google.com/macros/s/AKfycbywyP0GiL3xSz5sOEptSGQIKCjPYzUU1GMwM2aUQtJe3eCY9KIV-d21kbnIAUh6e_7m/exec', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      showMessage('提交成功！註冊結果請等候管理員確認');
-    } else {
-      showMessage('提交失敗，請稍後再試');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    showMessage('提交失敗，請稍後再試');
-  });
-}
-
-function showMessage(text, onConfirm) {
-  document.getElementById("customModal")?.remove();
-  const overlay = document.createElement("div");
-  overlay.id = "customModal";
-  Object.assign(overlay.style, {
-    position: "fixed",
-    inset: "0",
-    background: "rgba(0,0,0,0.6)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: "9999",
-  });
-  const box = document.createElement("div");
-  Object.assign(box.style, {
-    background: "#fff",
-    color: "#000",
-    borderRadius: "12px",
-    padding: "30px 40px",
-    fontSize: "22px",
-    textAlign: "center",
-    maxWidth: "80%",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-  });
-  box.innerHTML = text;
-
-  const btn = document.createElement("button");
-  btn.textContent = "確定";
-  Object.assign(btn.style, {
-    marginTop: "24px",
-    fontSize: "20px",
-    padding: "10px 28px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#0b5ed7",
-    color: "#fff",
-  });
-
-  // ← 只改這段：先移除視窗，連續兩次 rAF 確保完成重繪，再執行 onConfirm（開相簿）
-  btn.onclick = () => {
-    overlay.remove();
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (typeof onConfirm === "function") onConfirm();
-      });
-    });
-  };
-
-  box.appendChild(document.createElement("br"));
-  box.appendChild(btn);
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-}
-  </script>
 </body>
 </html>
