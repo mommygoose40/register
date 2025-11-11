@@ -161,7 +161,7 @@
       </div>
 
       <div class="form-field">
-        <label for="lineName">Line暱稱</label>
+        <label for="lineName">Line 暱稱</label>
         <input type="text" id="lineName" name="lineName" required>
       </div>
     </div>
@@ -175,58 +175,28 @@
 
   <script>
     function submitForm() {
-    const name = document.getElementById('name').value.trim();
-    const division = document.getElementById('division').value.trim();
-    const team = document.getElementById('team').value.trim();
-    const lineName = document.getElementById('lineName').value.trim();
+      const name = document.getElementById('name').value;
+      const division = document.getElementById('division').value;
+      const team = document.getElementById('team').value;
+      const lineName = document.getElementById('lineName').value;
 
-    // 檢查必填欄位
-    if (!name) {
-        showWarningAlert('提交失敗', '請填寫姓名');
-        return;
-    }
-    if (!division) {
-        showWarningAlert('提交失敗', '請填寫第幾大隊');
-        return;
-    }
-    if (!lineName) {
-        showWarningAlert('提交失敗', '請填寫Line暱稱');
-        return;
-    }
+      // 修正Line暱稱參數名稱，與GAS一致
+      const url = `https://script.google.com/macros/s/AKfycbzhfDTfRusiKLmzM-y1mc-JrTj3jhd3k17QxInsjl-_P8O1MNzAdgyI9zkbIhBF7bMT/exec?姓名=${encodeURIComponent(name)}&大隊=${encodeURIComponent(division)}&小隊=${encodeURIComponent(team)}&Line暱稱=${encodeURIComponent(lineName)}`;
 
-    // 檢查重複提交（根據姓名和Line暱稱判斷）
-    if (checkDuplicateSubmission(name, lineName)) {
-        showWarningAlert('提交失敗', '您已經提交過註冊表單');
-        return;
-    }
-
-    // 修正Line暱稱參數名稱，與GAS一致
-    const url = `https://script.google.com/macros/s/AKfycbzhfDTfRusiKLmzM-y1mc-JrTj3jhd3k17QxInsjl-_P8O1MNzAdgyI9zkbIhBF7bMT/exec?姓名=${encodeURIComponent(name)}&大隊=${encodeURIComponent(division)}&小隊=${encodeURIComponent(team)}&Line暱稱=${encodeURIComponent(lineName)}`;
-
-    fetch(url)
+      fetch(url)
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                // 提交成功後記錄到本地儲存
-                saveSubmissionRecord(name, lineName);
-                showSuccessAlert('提交成功', '註冊結果請等候管理員確認');
-            } else {
-                showWarningAlert('提交失敗', '請稍後再試');
-            }
+          if (data.status === 'success') {
+            showSuccessAlert('提交成功','註冊結果請等候管理員確認');
+          } else {
+            showWarningAlert('提交失敗','請稍後再試');
+          }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showWarningAlert('提交失敗', '請稍後再試');
+          console.error('Error:', error);
+          showWarningAlert('提交失敗','請稍後再試');
         });
-}
-
-// 檢查是否重複提交（使用 localStorage 記錄）
-function checkDuplicateSubmission(name, lineName) {
-    const submissions = JSON.parse(localStorage.getItem('volunteerSubmissions') || '[]');
-    return submissions.some(submission => 
-        submission.name === name && submission.lineName === lineName
-    );
-}
+    }
 
     function showMessage(text, onConfirm) {
       document.getElementById("customModal")?.remove();
@@ -317,7 +287,7 @@ function createCustomAlert(title, message = '', isSuccess = false) {
 
   // ✅ 使用 emoji，不加顏色，確保 Android 正常顯示
   const iconHTML = isSuccess
-    ? `<span style="font-size:26px;">✔️</span>`
+    ? `<span style="font-size:28px;">✔️</span>`
     : `<span style="font-size:32px;">⚠️</span>`;
 
   const styleConfig = hasMessage
