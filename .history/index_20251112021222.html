@@ -172,7 +172,7 @@
     <!-- 按鈕區域 -->
     <div class="button-group">
       <button class="ui-btn gray" id="closeBtn"  onclick="liff.closeWindow()">關閉頁面</button>
-      <button class="ui-btn blue" id="submitBtn">提交表單</button>
+      <button class="ui-btn blue" id="submitBtn">提交註冊</button>
     </div>
   </div>
 
@@ -186,109 +186,49 @@
     }
 
     // 提交表單函數
-function submitForm() {
-    // 顯示處理中的小視窗
-    showMicLoading();
+    function submitForm() {
+        const name = document.getElementById('name').value.trim();
+        const division = document.getElementById('division').value.trim();
+        const team = document.getElementById('team').value.trim();
+        const lineName = document.getElementById('lineName').value.trim();
 
-    const name = document.getElementById('name').value.trim();
-    const division = document.getElementById('division').value.trim();
-    const team = document.getElementById('team').value.trim();
-    const lineName = document.getElementById('lineName').value.trim();
+        // 檢查必填欄位
+        if (!name) {
+            showWarningAlert('請填寫姓名');
+            return;
+        }
+        if (!division) {
+            showWarningAlert('請填寫第幾大隊');
+            return;
+        }
+        if (!lineName) {
+            showWarningAlert('請填寫Line暱稱');
+            return;
+        }
 
-    // 檢查必填欄位
-    if (!name) {
-        hideMicLoading();  // 隱藏處理中的視窗
-        showWarningAlert('請填寫姓名');
-        return;
-    }
-    if (!division) {
-        hideMicLoading();  // 隱藏處理中的視窗
-        showWarningAlert('請填寫第幾大隊');
-        return;
-    }
-    if (!lineName) {
-        hideMicLoading();  // 隱藏處理中的視窗
-        showWarningAlert('請填寫Line暱稱');
-        return;
-    }
+        // 檢查是否重複提交
+        if (checkDuplicateSubmission(name, lineName)) {
+            showWarningAlert('提交失敗','您已提交過註冊表單');
+            return;
+        }
 
-    // 檢查是否重複提交
-    if (checkDuplicateSubmission(name, lineName)) {
-        hideMicLoading();  // 隱藏處理中的視窗
-        showWarningAlert('提交失敗','您已提交過註冊表單');
-        return;
-    }
+        const url = `https://script.google.com/macros/s/AKfycbz2ptbr2YDnCK_eZXuOk_zEFDd88PGMWKeaIGpTr8XMYJ_jpEdhj15b5HDlV1CjOGrt/exec?姓名=${encodeURIComponent(name)}&大隊=${encodeURIComponent(division)}&小隊=${encodeURIComponent(team)}&Line暱稱=${encodeURIComponent(lineName)}`;
 
-    const url = `https://script.google.com/macros/s/AKfycbz2ptbr2YDnCK_eZXuOk_zEFDd88PGMWKeaIGpTr8XMYJ_jpEdhj15b5HDlV1CjOGrt/exec?姓名=${encodeURIComponent(name)}&大隊=${encodeURIComponent(division)}&小隊=${encodeURIComponent(team)}&Line暱稱=${encodeURIComponent(lineName)}`;
-
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            hideMicLoading();  // 隱藏處理中的視窗
-            if (data.status === 'success') {
-                showSuccessAlert('提交成功','註冊結果請等候管理員確認');
-                saveSubmissionRecord(name, lineName); // 儲存提交紀錄
-            } else {
-                showWarningAlert('提交失敗','請稍後再試');
-            }
-        })
-        .catch(error => {
-            hideMicLoading();  // 隱藏處理中的視窗
-            console.error('Error:', error);
-            showWarningAlert('提交失敗','請稍後再試');
-        });
-}
-
-// 顯示處理中的小視窗
-function showMicLoading(delay = 100) {
-    showScreenLock();
-
-    micLoadingTimer = setTimeout(() => {
-        let box = document.getElementById('micLoading');
-        if (!box) {
-            box = document.createElement('div');
-            box.id = 'micLoading';
-            Object.assign(box.style, {
-                position: 'fixed',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'rgba(255,255,255,0.96)',
-                borderRadius: '12px',
-                padding: '18px 26px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                zIndex: '9999',
-                fontSize: '21px',
-                color: '#333'
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccessAlert('提交成功','註冊結果請等候管理員確認');
+                    saveSubmissionRecord(name, lineName); // 儲存提交紀錄
+                } else {
+                    showWarningAlert('提交失敗，請稍後再試');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showWarningAlert('提交失敗，請稍後再試');
             });
-            box.innerHTML = `
-                <div class="spinner" style="
-                  width:22px;height:22px;
-                  border:3px solid #ccc;
-                  border-top:3px solid #0b5ed7;
-                  border-radius:50%;
-                  animation:spin 1s linear infinite;"></div>
-                <span>處理中...</span>
-            `;
-            const style = document.createElement('style');
-            style.textContent = `@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }`;
-            document.head.appendChild(style);
-            document.body.appendChild(box);
-        } else box.style.display = 'flex';
-    }, delay);
-}
-
-// 隱藏處理中的視窗
-function hideMicLoading() {
-    clearTimeout(micLoadingTimer);
-    const box = document.getElementById('micLoading');
-    if (box) box.style.display = 'none';
-    hideScreenLock();
-}
+    }
 
     // 儲存提交記錄到本地
     function saveSubmissionRecord(name, lineName) {
